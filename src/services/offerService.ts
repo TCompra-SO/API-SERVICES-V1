@@ -306,6 +306,7 @@ export class OfferService {
             canceledByCreator: 1,
             selectionDate: 1,
             delivered: 1,
+            cancelRated: 1,
             requerimentTitle: {
               $arrayElemAt: ["$requerimentDetails.name", 0],
             }, // Extrae el campo 'name' del primer requerimiento encontrado
@@ -389,7 +390,7 @@ export class OfferService {
             canceledByCreator: 1,
             selectionDate: 1,
             delivered: 1,
-
+            cancelRated: 1,
             // Extrae el campo 'name' de `ProductModel` (en `requerimentDetails`) como `requerimentTitle`
             requerimentTitle: {
               $arrayElemAt: ["$requerimentDetails.name", 0],
@@ -503,7 +504,7 @@ export class OfferService {
             canceledByCreator: 1,
             selectionDate: 1,
             delivered: 1,
-
+            cancelRated: 1,
             // Extrae el campo 'name' de `ProductModel` (en `requerimentDetails`) como `requerimentTitle`
             requerimentTitle: {
               $arrayElemAt: ["$requerimentDetails.name", 0],
@@ -604,7 +605,7 @@ export class OfferService {
             canceledByCreator: 1,
             selectionDate: 1,
             delivered: 1,
-
+            cancelRated: 1,
             // Extrae el campo 'name' de `ProductModel` (en `requerimentDetails`) como `requerimentTitle`
             requerimentTitle: {
               $arrayElemAt: ["$requerimentDetails.name", 0],
@@ -705,7 +706,7 @@ export class OfferService {
           canceledByCreator: 1,
           selectionDate: 1,
           delivered: 1,
-
+          cancelRated: 1,
           // Extrae el campo 'name' de `ProductModel` (en `requerimentDetails`) como `requerimentTitle`
           requerimentTitle: {
             $arrayElemAt: ["$requerimentDetails.name", 0],
@@ -1446,7 +1447,7 @@ export class OfferService {
             canceledByCreator: 1,
             selectionDate: 1,
             delivered: 1,
-
+            cancelRated: 1,
             // Extrae el campo 'name' de `ProductModel` (en `requerimentDetails`) como `requerimentTitle`
             requerimentTitle: {
               $arrayElemAt: ["$requerimentDetails.name", 0],
