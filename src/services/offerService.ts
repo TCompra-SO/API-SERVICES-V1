@@ -942,8 +942,10 @@ export class OfferService {
         typeScore: "Client", // Tipo de puntaje
         uidEntity: purchaseOrderData?.[0].userClientID, // ID de la empresa a ser evaluada
         uidUser: purchaseOrderData?.[0].userProviderID, // ID del usuario que evalua
+        offerId: purchaseOrderData?.[0].offerID,
         score: score, // Puntaje
         comments: comments, // Comentarios
+        type: TypeRequeriment.SERVICES,
       };
 
       const resultData = await axios.post(
@@ -1271,17 +1273,6 @@ export class OfferService {
           }
         );
 
-        await ServiceModel.updateOne(
-          { uid: requerimentID },
-          {
-            $set: {
-              stateID: RequirementState.PUBLISHED,
-            },
-            $inc: {
-              number_offers: -1, // Resta 1 a numOffers
-            },
-          }
-        );
         return {
           success: true,
           code: 200,
