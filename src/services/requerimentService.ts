@@ -1298,6 +1298,7 @@ export class RequerimentService {
         typeScore: "Provider", // Tipo de puntaje
         uidEntity: purchaseOrderData?.[0].userProviderID, // ID de la empresa a ser evaluada
         uidUser: purchaseOrderData?.[0].userClientID, // ID del usuario que evalua
+        offerId: offerID,
         score: score, // Puntaje
         comments: comments, // Comentarios
         type: TypeRequeriment.SERVICES,

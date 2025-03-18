@@ -523,7 +523,6 @@ const republishController = async (req: RequestExt, res: Response) => {
             key: offerUIDs[i],
             userId: offerData.data?.[i].userID,
           });
-          
         }
       }
 
