@@ -942,23 +942,29 @@ export class OfferService {
         typeScore: "Client", // Tipo de puntaje
         uidEntity: purchaseOrderData?.[0].userClientID, // ID de la empresa a ser evaluada
         uidUser: purchaseOrderData?.[0].userProviderID, // ID del usuario que evalua
+        offerId: purchaseOrderData?.[0].offerID,
         score: score, // Puntaje
         comments: comments, // Comentarios
+        type: TypeRequeriment.SERVICES,
       };
 
-      const resultData = await axios.post(
-        `${API_USER}score/registerScore/`,
-        requestBody
-      );
-
-      if (!resultData.data.success) {
-        return {
-          success: false,
-          code: 401,
-          error: {
-            msg: "No se ha podido calificar al usuario",
-          },
-        };
+      try {
+        const resultData = await axios.post(
+          `${API_USER}score/registerScore/`,
+          requestBody
+        );
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          return {
+            success: false,
+            code: 401,
+            error: {
+              msg: error.response?.data.msg,
+            },
+          };
+        } else {
+          console.error("Error desconocido:", error);
+        }
       }
       const requerimentID = purchaseOrderData?.[0].requerimentID;
       // AQUI USAR LA FUNCION EN DISPUTA //
@@ -1271,17 +1277,24 @@ export class OfferService {
           }
         );
 
-        await ServiceModel.updateOne(
-          { uid: requerimentID },
-          {
-            $set: {
-              stateID: RequirementState.PUBLISHED,
-            },
-            $inc: {
-              number_offers: -1, // Resta 1 a numOffers
-            },
+        if (!canceledByCreator) {
+          const result = await ServiceModel.findOneAndUpdate(
+            { uid: requerimentID },
+            { $set: { stateID: RequirementState.PUBLISHED } }, // Actualización
+            { new: true }
+          );
+
+          if (!result) {
+            return {
+              success: false,
+              code: 409,
+              error: {
+                msg: "No se encontró el requerimiento para actualizar",
+              },
+            };
           }
-        );
+        }
+
         return {
           success: true,
           code: 200,
