@@ -1298,6 +1298,7 @@ export class RequerimentService {
         typeScore: "Provider", // Tipo de puntaje
         uidEntity: purchaseOrderData?.[0].userProviderID, // ID de la empresa a ser evaluada
         uidUser: purchaseOrderData?.[0].userClientID, // ID del usuario que evalua
+        offerId: offerID,
         score: score, // Puntaje
         comments: comments, // Comentarios
         type: TypeRequeriment.SERVICES,
@@ -1590,7 +1591,7 @@ export class RequerimentService {
       };
     }
   };
-
+  //AQUI
   static changeStateID = async (
     ServiceModel: any,
     uid: string,
@@ -1936,6 +1937,9 @@ export class RequerimentService {
             foreignField: "uid", // Clave en 'offersproducts'
             as: "offerDetails",
           },
+        },
+        {
+          $unwind: { path: "$offerDetails", preserveNullAndEmptyArrays: true },
         },
         // Filtro inicial (searchConditions)
         {
