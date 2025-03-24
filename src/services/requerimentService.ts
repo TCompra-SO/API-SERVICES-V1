@@ -1589,7 +1589,7 @@ export class RequerimentService {
       };
     }
   };
-
+  //AQUI
   static changeStateID = async (
     ServiceModel: any,
     uid: string,
@@ -1935,6 +1935,9 @@ export class RequerimentService {
             foreignField: "uid", // Clave en 'offersproducts'
             as: "offerDetails",
           },
+        },
+        {
+          $unwind: { path: "$offerDetails", preserveNullAndEmptyArrays: true },
         },
         // Filtro inicial (searchConditions)
         {
