@@ -82,6 +82,7 @@ const ServiceSchema = new Schema<RequerimentI>(
     publish_date: {
       type: Date,
       required: true,
+      index: true,
     },
     stateID: {
       type: Number,
