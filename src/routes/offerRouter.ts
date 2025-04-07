@@ -23,12 +23,17 @@ export class OfferRouter {
     this.router = Router();
     this.router.post(
       "/create",
+      checkJwt,
       saveNotificationMiddleware,
       CreateOfferController
     );
 
     this.router.get("/getDetailOffer/:uid", GetDetailOfferController);
-    this.router.get("/getOffers/:page/:pageSize", GetOffersController);
+    this.router.get(
+      "/getOffers/:page/:pageSize",
+      checkJwt,
+      GetOffersController
+    );
     this.router.get(
       "/getOffersByRequeriment/:requerimentID/:page/:pageSize",
       checkJwt,
