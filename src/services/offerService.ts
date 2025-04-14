@@ -937,6 +937,8 @@ export class OfferService {
           },
         },
       ]);
+
+      console.log(purchaseOrderData);
       // Corregir bien esto solo cambie CLIENT
       const requestBody = {
         typeScore: "Client", // Tipo de puntaje
@@ -947,7 +949,7 @@ export class OfferService {
         comments: comments, // Comentarios
         type: TypeRequeriment.SERVICES,
       };
-
+      console.log(requestBody);
       try {
         const resultData = await axios.post(
           `${API_USER}score/registerScore/`,
@@ -1277,22 +1279,20 @@ export class OfferService {
           }
         );
 
-        if (!canceledByCreator) {
-          const result = await ServiceModel.findOneAndUpdate(
-            { uid: requerimentID },
-            { $set: { stateID: RequirementState.PUBLISHED } }, // Actualización
-            { new: true }
-          );
+        const result = await ServiceModel.findOneAndUpdate(
+          { uid: requerimentID },
+          { $set: { stateID: RequirementState.PUBLISHED } }, // Actualización
+          { new: true }
+        );
 
-          if (!result) {
-            return {
-              success: false,
-              code: 409,
-              error: {
-                msg: "No se encontró el requerimiento para actualizar",
-              },
-            };
-          }
+        if (!result) {
+          return {
+            success: false,
+            code: 409,
+            error: {
+              msg: "No se encontró el requerimiento para actualizar",
+            },
+          };
         }
 
         return {
