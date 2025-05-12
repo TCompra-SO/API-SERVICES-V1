@@ -1984,6 +1984,7 @@ export class RequerimentService {
             email: 1,
             publish_date: 1,
             stateID: 1,
+            durationID: 1,
             uid: 1,
             createdAt: 1,
             updatedAt: 1,
