@@ -18,7 +18,7 @@ import { Console, error } from "node:console";
 import { TypeUser } from "../utils/Types";
 import { TypeRequeriment } from "../interfaces/purchaseOrder.interface";
 import { object } from "joi";
-let API_USER = process.env.API_USER;
+let API_USER = process.env.API_USER + "/v1/";
 export class OfferService {
   static CreateOffer = async (data: OfferI) => {
     const {
@@ -938,7 +938,6 @@ export class OfferService {
         },
       ]);
 
-      console.log(purchaseOrderData);
       // Corregir bien esto solo cambie CLIENT
       const requestBody = {
         typeScore: "Client", // Tipo de puntaje
@@ -949,7 +948,6 @@ export class OfferService {
         comments: comments, // Comentarios
         type: TypeRequeriment.SERVICES,
       };
-      console.log(requestBody);
       try {
         const resultData = await axios.post(
           `${API_USER}score/registerScore/`,
