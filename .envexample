@@ -11,6 +11,7 @@ CLOUDINARY_API_KEY=498896384715854
 CLOUDINARY_API_SECRET=D5YQeZzI0s2PrxsY-XcayJ233ck
 
 URL_FRONTEND = https://tcompra.com
+URL_FRONTEND_WWW = https://www.tcompra.com
 API_PRODUCTS=https://apiproducts.tcompra.com
 API_SERVICES=https://apiservices.tcompra.com
 API_LIQUIDATIONS=https://apiliquidations.tcompra.com
