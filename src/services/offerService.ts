@@ -40,7 +40,7 @@ export class OfferService {
 
     try {
       const result = RequerimentService.getRequerimentById(requerimentID);
-      const API_USER = process.env.API_USER;
+
       let entityID;
       let subUserEmail = "";
       let emailEntity;
