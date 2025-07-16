@@ -26,7 +26,7 @@ export const getNotificationForLastCreatedRequirements = async () => {
   }
 
   await axios.post(
-    `${process.env.API_USER}notification/sendLastRequirementsNotification/${RequirementType.SERVICE}`,
+    `${process.env.API_USER}/v1/notification/sendLastRequirementsNotification/${RequirementType.SERVICE}`,
     groupedRecords
   );
 };

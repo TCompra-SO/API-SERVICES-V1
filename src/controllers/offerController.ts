@@ -227,7 +227,7 @@ const GetOffersByRequerimentController = async (
 const getbasicRateDataController = async (req: Request, res: Response) => {
   try {
     const { uid } = req.params;
-    console.log(uid);
+
     const responseUser = await OfferService.BasicRateData(uid);
     if (responseUser && responseUser.success) {
       res.status(responseUser.code).send(responseUser);

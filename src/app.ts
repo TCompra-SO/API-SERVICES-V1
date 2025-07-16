@@ -8,6 +8,7 @@ import "./initConfig";
 
 const allowedOrigins = [
   process.env.URL_FRONTEND,
+  process.env.URL_FRONTEND_WWW,
   process.env.API_PRODUCTS,
   process.env.API_SERVICES,
   process.env.API_LIQUIDATIONS,
@@ -26,9 +27,10 @@ export class App {
       App.instance.use(
         cors({
           origin: (origin, callback) => {
-            if (allowedOrigins.includes(origin)) {
+            if (!origin || allowedOrigins.includes(origin)) {
               callback(null, true);
             } else {
+              console.error("Blocked by CORS:", origin);
               callback(new Error("Not allowed by CORS"));
             }
           },
