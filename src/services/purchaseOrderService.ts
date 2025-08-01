@@ -875,4 +875,24 @@ export class PurchaseOrderService {
       };
     }
   };
+
+  static updateField = async (uid: string, field: string, value: any) => {
+    try {
+      const updatedOrder = await PurchaseOrderModel.findOneAndUpdate(
+        { uid },
+        { $set: { [field]: value } },
+        { new: true }
+      );
+
+      return updatedOrder;
+    } catch (error) {
+      return {
+        success: false,
+        code: 500,
+        error: {
+          msg: "Error interno en el Servidor",
+        },
+      };
+    }
+  };
 }
