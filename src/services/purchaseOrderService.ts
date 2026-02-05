@@ -24,7 +24,7 @@ export class PurchaseOrderService {
     price_Filter: number,
     deliveryTime_Filter: number,
     location_Filter: number,
-    warranty_Filter: number
+    warranty_Filter: number,
   ) => {
     try {
       const offerBasicData = await OfferService.BasicRateData(offerID);
@@ -32,12 +32,10 @@ export class PurchaseOrderService {
       const userProviderID = offerBasicData.data?.[0].userId;
       const subUserProviderID = offerBasicData.data?.[0].subUserId;
 
-      const requerimentBasicData = await RequerimentService.BasicRateData(
-        requerimentID
-      );
-      const requerimentData = await RequerimentService.getRequerimentById(
-        requerimentID
-      );
+      const requerimentBasicData =
+        await RequerimentService.BasicRateData(requerimentID);
+      const requerimentData =
+        await RequerimentService.getRequerimentById(requerimentID);
       const userClientID = requerimentBasicData.data?.[0].userId;
       const subUserClientID = requerimentBasicData.data?.[0].subUserId;
 
@@ -64,15 +62,15 @@ export class PurchaseOrderService {
         };
       }
       const userProviderData = await axios.get(
-        `${API_USER}auth/getBaseDataUser/${subUserProviderID}`
+        `${API_USER}auth/getBaseDataUser/${subUserProviderID}`,
       );
 
       const basicProviderData = await axios.get(
-        `${API_USER}auth/getUser/${userProviderID}`
+        `${API_USER}auth/getUser/${userProviderID}`,
       );
 
       const baseClientData = await axios.get(
-        `${API_USER}auth/getUser/${userClientID}`
+        `${API_USER}auth/getUser/${userClientID}`,
       );
 
       const currencyData = await axios.get(`${API_USER}util/utilData/currency`);
@@ -80,11 +78,11 @@ export class PurchaseOrderService {
       const currencyId = requerimentData.data?.[0].currencyID; // Cambia este valor al ID que deseas buscar
       const currencyValue = currencyData.data.currencies.find(
         (currency: { id: number; value: string; alias: string }) =>
-          currency.id === currencyId
+          currency.id === currencyId,
       )?.alias;
 
       const daysDeliveryData = await axios.get(
-        `${API_USER}util/utilData/delivery_time`
+        `${API_USER}util/utilData/delivery_time`,
       );
 
       const deliveryTimeID = offerData.data?.[0].deliveryTimeID;
@@ -94,7 +92,7 @@ export class PurchaseOrderService {
         deliveryDate = new Date();
         days = daysDeliveryData.data.times.find(
           (days: { id: number; value: string; days: number }) =>
-            days.id === deliveryTimeID
+            days.id === deliveryTimeID,
         )?.days;
 
         deliveryDate.setDate(deliveryDate.getDate() + days);
@@ -125,9 +123,12 @@ export class PurchaseOrderService {
         totalIgv = parseFloat((price - subTotal).toFixed(2));
         total = price;
       }
-
+      console.log(basicProviderData.data.data.lastNumPurchaseOrder);
+      let numOrder = basicProviderData.data.data?.lastNumPurchaseOrder + 1;
+      console.log(numOrder);
       const newPurchaseOrder: Omit<PurchaseOrderI, "uid"> = {
         type: TypeRequeriment.SERVICES,
+        numOrder: numOrder,
         userClientID: userClientID,
         userNameClient: requerimentBasicData.data?.[0].userName,
         addressClient: baseClientData.data.data?.address,
@@ -175,14 +176,14 @@ export class PurchaseOrderService {
         userProviderID,
         subUserProviderID,
         "numPurchaseOrdersProvider",
-        true
+        true,
       );
 
       await RequerimentService.manageCount(
         userClientID,
         subUserClientID,
         "numPurchaseOrdersClient",
-        true
+        true,
       );
       // const sendMail = sendEmailPurchaseOrder(newPurchaseOrder);
       let responseEmail = "";
@@ -278,7 +279,7 @@ export class PurchaseOrderService {
   static getPurchaseOrdersClient = async (
     userClientID: string,
     page: number,
-    pageSize: number
+    pageSize: number,
   ) => {
     if (!page || page < 1) page = 1;
     if (!pageSize || pageSize < 1) pageSize = 10;
@@ -316,7 +317,7 @@ export class PurchaseOrderService {
   static getPurchaseOrdersProvider = async (
     userProviderID: string,
     page: number,
-    pageSize: number
+    pageSize: number,
   ) => {
     if (!page || page < 1) page = 1;
     if (!pageSize || pageSize < 1) pageSize = 10;
@@ -388,7 +389,7 @@ export class PurchaseOrderService {
     uid: string,
     typeUser: number,
     page: number,
-    pageSize: number
+    pageSize: number,
   ) => {
     if (!page || page < 1) page = 1;
     if (!pageSize || pageSize < 1) pageSize = 10;
@@ -442,7 +443,7 @@ export class PurchaseOrderService {
     uid: string,
     typeUser: number,
     page: number,
-    pageSize: number
+    pageSize: number,
   ) => {
     try {
       let result;
@@ -502,7 +503,7 @@ export class PurchaseOrderService {
     fieldName?: string,
     orderType?: number,
     filterColumn?: string,
-    filterData?: [string]
+    filterData?: [string],
   ) => {
     page = !page || page < 1 ? 1 : page;
     pageSize = !pageSize || pageSize < 1 ? 10 : pageSize;
@@ -562,13 +563,13 @@ export class PurchaseOrderService {
         const searchConditionsWithoutKeyWords = {
           ...searchConditions,
           $and: searchConditions.$and.filter(
-            (condition: any) => !condition.$or
+            (condition: any) => !condition.$or,
           ),
         };
 
         // Obtener todos los registros sin aplicar el filtro de palabras clave
         const allResults = await PurchaseOrderModel.find(
-          searchConditionsWithoutKeyWords
+          searchConditionsWithoutKeyWords,
         );
         PurchaseOrderState;
         // Configurar Fuse.js
@@ -647,7 +648,7 @@ export class PurchaseOrderService {
     fieldName?: string,
     orderType?: number,
     filterColumn?: string,
-    filterData?: [string]
+    filterData?: [string],
   ) => {
     page = !page || page < 1 ? 1 : page;
     pageSize = !pageSize || pageSize < 1 ? 10 : pageSize;
@@ -707,13 +708,13 @@ export class PurchaseOrderService {
         const searchConditionsWithoutKeyWords = {
           ...searchConditions,
           $and: searchConditions.$and.filter(
-            (condition: any) => !condition.$or
+            (condition: any) => !condition.$or,
           ),
         };
 
         // Obtener todos los registros sin aplicar el filtro de palabras clave
         const allResults = await PurchaseOrderModel.find(
-          searchConditionsWithoutKeyWords
+          searchConditionsWithoutKeyWords,
         );
 
         // Configurar Fuse.js
@@ -805,7 +806,7 @@ export class PurchaseOrderService {
       await page.pdf({
         format: "A4",
         printBackground: true,
-      })
+      }),
     );
     // Cerrar el navegador
     await browser.close();
@@ -883,7 +884,7 @@ export class PurchaseOrderService {
       const updatedOrder = await PurchaseOrderModel.findOneAndUpdate(
         { uid },
         { $set: { [field]: value } },
-        { new: true }
+        { new: true },
       );
 
       return updatedOrder;

@@ -15,6 +15,10 @@ const PurchaseOrderSchema = new Schema<PurchaseOrderI>({
     type: Number,
     required: true,
   },
+  numOrder: {
+    type: Number,
+    required: true,
+  },
   userClientID: {
     type: String,
     required: true,
@@ -167,7 +171,7 @@ const PurchaseOrderSchema = new Schema<PurchaseOrderI>({
 
 const PurchaseOrderModel = mongoose.model<PurchaseOrderI>(
   "PurchaseOrderServices",
-  PurchaseOrderSchema
+  PurchaseOrderSchema,
 );
 
 export default PurchaseOrderModel;
