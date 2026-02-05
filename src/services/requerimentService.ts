@@ -52,7 +52,7 @@ export class RequerimentService {
       let email = "";
       //const API_USER = process.env.API_USER;
       const resultData = await axios.get(
-        `${API_USER}auth/getBaseDataUser/${userID}`
+        `${API_USER}auth/getBaseDataUser/${userID}`,
       );
 
       let subUserEmail = "";
@@ -107,7 +107,7 @@ export class RequerimentService {
         entityID,
         userID,
         "num" + NameAPI.NAME + "s",
-        true
+        true,
       );
 
       return {
@@ -134,7 +134,7 @@ export class RequerimentService {
     entityID: string,
     userID: string,
     field: string,
-    increase: boolean
+    increase: boolean,
   ) => {
     const ResourceCountersCollection =
       mongoose.connection.collection("resourcecounters");
@@ -151,19 +151,38 @@ export class RequerimentService {
       // Define si incrementa (+1) o decrementa (-1)
       const value = increase ? 1 : -1;
 
-      // Función para actualizar el contador
+      // Función interna para actualizar el contador
       const updateCounter = async (uid: string, typeEntity: string) => {
-        await ResourceCountersCollection.updateOne(
-          { uid, typeEntity },
-          { $inc: { [field]: value }, $set: { updateDate: new Date() } },
-          { upsert: true }
-        );
+        const filter = { uid }; // Usamos solo UID para evitar conflictos de índices
+        const update = {
+          $inc: { [field]: value },
+          $set: { updateDate: new Date(), typeEntity },
+        };
+
+        try {
+          // Intento 1: Upsert normal
+          await ResourceCountersCollection.updateOne(filter, update, {
+            upsert: true,
+          });
+        } catch (err: any) {
+          // Si hay un error E11000 es porque otra función creó el registro en este mismo instante
+          if (err.code === 11000) {
+            // Intento 2: Update puro (ya que el registro ya existe)
+            await ResourceCountersCollection.updateOne(filter, update);
+          } else {
+            throw err;
+          }
+        }
       };
 
+      // Lógica de actualización según el tipo de entidad
       if (entityID !== userID) {
         await updateCounter(userID, TypeEntity.SUBUSER); // Subusuario
         await updateCounter(entityID, TypeEntity.COMPANY); // Compañía
-        queueUpdate(entityID, userID, field, value);
+        // Si tienes implementado queueUpdate, asegúrate de que no cause errores
+        if (typeof queueUpdate === "function") {
+          queueUpdate(entityID, userID, field, value);
+        }
       } else if (CompanyData) {
         await updateCounter(entityID, TypeEntity.COMPANY); // Compañía
       } else {
@@ -174,6 +193,9 @@ export class RequerimentService {
       if (userMasterData?.uid) {
         await updateCounter(userMasterData.uid, TypeEntity.MASTER);
       }
+
+      // RETORNO DE ÉXITO: Vital para tu IF de control
+      return { success: true };
     } catch (error: any) {
       console.error("Error en manageCount:", error.message);
       return {
@@ -420,7 +442,7 @@ export class RequerimentService {
     page: number,
     pageSize: number,
     fieldName?: string,
-    orderType?: OrderType
+    orderType?: OrderType,
   ) => {
     try {
       if (!page || page < 1) page = 1; // Valor por defecto para la página
@@ -548,7 +570,7 @@ export class RequerimentService {
       const resultWithCities = result.map((item) => {
         // Buscar el país que contiene la ciudad con el cityID
         const country = countries.find((country) =>
-          country.cities.some((city) => city.id === item.cityID)
+          country.cities.some((city) => city.id === item.cityID),
         );
 
         // Si se encuentra el país, buscar la ciudad
@@ -613,7 +635,7 @@ export class RequerimentService {
     page: number,
     pageSize: number,
     fieldName?: string,
-    orderType?: number
+    orderType?: number,
   ) => {
     try {
       if (!page || page < 1) page = 1; // Valor por defecto para la página
@@ -708,7 +730,7 @@ export class RequerimentService {
       const resultWithCities = result.map((item) => {
         // Buscar el país que contiene la ciudad con el cityID
         const country = countries.find((country) =>
-          country.cities.some((city) => city.id === item.cityID)
+          country.cities.some((city) => city.id === item.cityID),
         );
 
         // Si se encuentra el país, buscar la ciudad
@@ -768,7 +790,7 @@ export class RequerimentService {
 
   static updateRequeriment = async (
     uid: string,
-    data: Partial<RequerimentI>
+    data: Partial<RequerimentI>,
   ) => {
     try {
       // Buscar y actualizar el requerimiento por su UID
@@ -779,7 +801,7 @@ export class RequerimentService {
           ...data,
           updated_at: new Date(), // Fecha de actualización
         },
-        { new: true } // Retorna el documento actualizado
+        { new: true }, // Retorna el documento actualizado
       );
 
       // Si no se encuentra el requerimiento o no se puede actualizar
@@ -821,12 +843,11 @@ export class RequerimentService {
     price_Filter: number,
     deliveryTime_Filter: number,
     location_Filter: number,
-    warranty_Filter: number
+    warranty_Filter: number,
   ) => {
     try {
-      const requerimentData = await RequerimentService.getRequerimentById(
-        requerimentID
-      );
+      const requerimentData =
+        await RequerimentService.getRequerimentById(requerimentID);
 
       if (!requerimentData.success || requerimentData.data?.length == 0) {
         return {
@@ -861,7 +882,7 @@ export class RequerimentService {
                   stateID: 2,
                 },
               },
-              { new: true } // Devolver el documento actualizado
+              { new: true }, // Devolver el documento actualizado
             );
 
             if (!updatedProduct) {
@@ -881,7 +902,7 @@ export class RequerimentService {
                 price_Filter,
                 deliveryTime_Filter,
                 location_Filter,
-                warranty_Filter
+                warranty_Filter,
               );
 
             if (!purchaseOrder.success) {
@@ -893,7 +914,7 @@ export class RequerimentService {
                     stateID: 1,
                   },
                 },
-                { new: true } // Devolver el documento actualizado
+                { new: true }, // Devolver el documento actualizado
               );
               return {
                 success: false,
@@ -912,7 +933,7 @@ export class RequerimentService {
                   selectionDate: new Date(),
                 },
               },
-              { new: true }
+              { new: true },
             );
             if (!updatedOffer) {
               return {
@@ -1022,7 +1043,7 @@ export class RequerimentService {
         };
       }
       const userBase = await axios.get(
-        `${API_USER}auth/getBaseDataUser/${result[0].subUserId}`
+        `${API_USER}auth/getBaseDataUser/${result[0].subUserId}`,
       );
 
       result[0].userImage = userBase.data.data?.[0].image;
@@ -1103,9 +1124,8 @@ export class RequerimentService {
           (requirementData.stateID != RequirementState.CANCELED &&
             !requirementData.winOffer) // no hay oferta seleccionada cancelada
         ) {
-          const offers = await OfferService.getOffersByRequeriment(
-            requirementID
-          );
+          const offers =
+            await OfferService.getOffersByRequeriment(requirementID);
 
           if (offers.success && offers.data && offers.data.length > 0) {
             // eliminar todas las ofertas del requerimiento
@@ -1113,7 +1133,7 @@ export class RequerimentService {
             await Promise.all(
               offers.data.map(async (offer) => {
                 await OfferService.deleteOffer(offer.uid);
-              })
+              }),
             );
           }
         }
@@ -1125,14 +1145,14 @@ export class RequerimentService {
               stateID: RequirementState.ELIMINATED,
             },
           },
-          { new: true }
+          { new: true },
         );
         //Eliminamos
         await this.manageCount(
           requirementData.entityID,
           requirementData.userID,
           "numDelete" + NameAPI.NAME + "s",
-          true
+          true,
         );
 
         //Eliminamos
@@ -1140,7 +1160,7 @@ export class RequerimentService {
           requirementData.entityID,
           requirementData.userID,
           "num" + NameAPI.NAME + "s",
-          false
+          false,
         );
 
         return {
@@ -1186,9 +1206,8 @@ export class RequerimentService {
           requirementData.stateID == RequirementState.CANCELED ||
           requirementData.stateID == RequirementState.EXPIRED
         ) {
-          const offers = await OfferService.getOffersByRequeriment(
-            requirementID
-          );
+          const offers =
+            await OfferService.getOffersByRequeriment(requirementID);
           if (offers.success && offers.data && offers.data.length > 0) {
             // eliminar todas las ofertas del requerimiento
             await Promise.all(
@@ -1196,11 +1215,11 @@ export class RequerimentService {
                 await OfferService.updateStateOffer(
                   offer.uid,
                   OfferState.ACTIVE,
-                  { canceledByCreator: { $ne: true } }
+                  { canceledByCreator: { $ne: true } },
                 );
                 // Guardar la offer.uid en el array
                 offerUids.push(offer.uid);
-              })
+              }),
             );
           }
 
@@ -1213,7 +1232,7 @@ export class RequerimentService {
                 completion_date: completionDate,
               },
             },
-            { new: true }
+            { new: true },
           );
 
           return {
@@ -1258,7 +1277,7 @@ export class RequerimentService {
     requerimentID: string,
     delivered: boolean,
     score: number,
-    comments?: string
+    comments?: string,
   ) => {
     let purchaseOrderUID;
     let requerimentUID;
@@ -1311,7 +1330,7 @@ export class RequerimentService {
       try {
         const resultData = await axios.post(
           `${API_USER}score/registerScore/`,
-          requestBody
+          requestBody,
         );
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -1367,7 +1386,7 @@ export class RequerimentService {
                 stateID: PurchaseOrderState.FINISHED,
               },
             },
-            { new: true } // Devuelve el documento actualizado
+            { new: true }, // Devuelve el documento actualizado
           );
           purchaseOrderUID = purchaseOrderUID?.uid;
         } else {
@@ -1383,7 +1402,7 @@ export class RequerimentService {
                 stateID: PurchaseOrderState.PENDING,
               },
             },
-            { new: true } // Devuelve el documento actualizado
+            { new: true }, // Devuelve el documento actualizado
           );
           purchaseOrderUID = purchaseOrderUID?.uid;
         }
@@ -1397,7 +1416,7 @@ export class RequerimentService {
               stateID: RequirementState.FINISHED,
             },
           },
-          { new: true } // Devuelve el documento actualizado
+          { new: true }, // Devuelve el documento actualizado
         );
         requerimentUID = requerimentUID?.uid;
 
@@ -1430,7 +1449,7 @@ export class RequerimentService {
       const updatedDocument = await Model.findOneAndUpdate(
         { uid },
         { $set: { stateID: PurchaseOrderState.DISPUTE } },
-        { new: true } // Devuelve el documento actualizado
+        { new: true }, // Devuelve el documento actualizado
       );
 
       // Verificar si se encontró y actualizó el documento
@@ -1492,12 +1511,12 @@ export class RequerimentService {
           offerUids = await this.changeStateOffer(
             uid,
             OfferState.CANCELED,
-            true
+            true,
           );
           requerimentUid = await this.changeStateID(
             ServiceModel,
             uid,
-            RequirementState.CANCELED
+            RequirementState.CANCELED,
           );
           return {
             success: true,
@@ -1527,14 +1546,14 @@ export class RequerimentService {
               cancellationDate: new Date(),
               stateID: PurchaseOrderState.CANCELED,
             }, // Campos a actualizar
-            { new: true } // Devuelve el documento actualizado
+            { new: true }, // Devuelve el documento actualizado
           );
         }
         offerUids = await this.changeStateOffer(uid, OfferState.CANCELED, true); // cancelo todas las Ofertas del requerimiento
         selectOfferUid = await this.changeStateID(
           OfferModel,
           OfferID,
-          OfferState.CANCELED
+          OfferState.CANCELED,
         ); // cancelo la oferta asociada
         await OfferModel.updateOne(
           { uid: OfferID }, // Encuentra el documento por UID
@@ -1542,13 +1561,13 @@ export class RequerimentService {
             $set: {
               canceledByCreator: false, // Si no existe, lo agrega automáticamente
             },
-          }
+          },
         );
 
         requerimentUid = await this.changeStateID(
           ServiceModel,
           uid,
-          RequirementState.CANCELED
+          RequirementState.CANCELED,
         );
 
         return {
@@ -1566,12 +1585,12 @@ export class RequerimentService {
         offerUids = await this.changeStateOffer(
           uid,
           OfferState.CANCELED,
-          false
+          false,
         );
         requerimentUid = await this.changeStateID(
           ServiceModel,
           uid,
-          RequirementState.CANCELED
+          RequirementState.CANCELED,
         );
 
         return {
@@ -1599,7 +1618,7 @@ export class RequerimentService {
   static changeStateID = async (
     ServiceModel: any,
     uid: string,
-    stateID: number
+    stateID: number,
   ) => {
     try {
       await ServiceModel.updateOne(
@@ -1608,7 +1627,7 @@ export class RequerimentService {
           $set: {
             stateID: stateID,
           },
-        }
+        },
       );
       return uid;
     } catch (error) {
@@ -1620,7 +1639,7 @@ export class RequerimentService {
   static changeStateOffer = async (
     uid: string,
     stateID: number,
-    canceledByCreator: boolean
+    canceledByCreator: boolean,
   ) => {
     try {
       // 1. Encuentra los documentos que coinciden con los criterios
@@ -1629,7 +1648,7 @@ export class RequerimentService {
           requerimentID: uid,
           stateID: { $nin: [5, 7] },
         },
-        { uid: 1 } // Solo selecciona el campo `uid`
+        { uid: 1 }, // Solo selecciona el campo `uid`
       );
 
       // Extrae las `uids` de los documentos encontrados
@@ -1645,7 +1664,7 @@ export class RequerimentService {
             stateID: stateID,
             canceledByCreator: canceledByCreator,
           },
-        }
+        },
       );
       return offerUids;
     } catch (error) {
@@ -1656,7 +1675,7 @@ export class RequerimentService {
 
   static updateNumberOffersRequeriment = async (
     uid: string,
-    increase: boolean
+    increase: boolean,
   ) => {
     try {
       // Buscar y actualizar el requerimiento por su UID
@@ -1670,7 +1689,7 @@ export class RequerimentService {
             $inc: { number_offers: increase ? 1 : -1 }, // Suma o resta 1
             updated_at: new Date(), // Actualiza la fecha
           },
-          { new: true, runValidators: true } // Devuelve el documento actualizado y valida restricciones
+          { new: true, runValidators: true }, // Devuelve el documento actualizado y valida restricciones
         )
           .where("number_offers")
           .gt(0); // Asegura que solo reste si es mayor a 0
@@ -1724,7 +1743,7 @@ export class RequerimentService {
     endDate?: string,
     companyId?: string,
     page?: number,
-    pageSize?: number
+    pageSize?: number,
   ) => {
     page = !page || page < 1 ? 1 : page;
     pageSize = !pageSize || pageSize < 1 ? 10 : pageSize;
@@ -1808,7 +1827,7 @@ export class RequerimentService {
         // Obtener todos los registros sin aplicar el filtro de palabras clave
         const allResults = await ServiceModel.find(
           searchConditionsWithoutKeyWords,
-          projection
+          projection,
         );
 
         // Configurar Fuse.js
@@ -1867,7 +1886,7 @@ export class RequerimentService {
     fieldName?: string,
     orderType?: OrderType,
     filterColumn?: string,
-    filterData?: [string]
+    filterData?: [string],
   ) => {
     page = !page || page < 1 ? 1 : page;
     pageSize = !pageSize || pageSize < 1 ? 10 : pageSize;
@@ -2020,7 +2039,7 @@ export class RequerimentService {
             if (stage.$match && stage.$match.$and) {
               // Filtrar las condiciones del $and eliminando únicamente las que contienen $or
               const remainingMatchConditions = stage.$match.$and.filter(
-                (condition: any) => !condition.$or
+                (condition: any) => !condition.$or,
               );
 
               // Si hay condiciones restantes, devolver el nuevo $match, si no, eliminar la etapa
@@ -2034,7 +2053,7 @@ export class RequerimentService {
 
         // Ejecutar el pipeline sin el filtro de palabras clave
         const allResults = await ServiceModel.aggregate(
-          pipelineWithoutKeyWords
+          pipelineWithoutKeyWords,
         );
 
         // Configurar Fuse.js para la búsqueda difusa
@@ -2195,7 +2214,7 @@ export class RequerimentService {
             await PurchaseOrderService.updateField(
               usersData.data[i].uid,
               "scoreState.notifyClient",
-              true
+              true,
             );
           }
         }

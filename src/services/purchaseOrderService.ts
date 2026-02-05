@@ -124,9 +124,8 @@ export class PurchaseOrderService {
         totalIgv = parseFloat((price - subTotal).toFixed(2));
         total = price;
       }
-      console.log(basicProviderData.data.data.lastNumPurchaseOrder);
       let numOrder = basicProviderData.data.data?.lastNumPurchaseOrder + 1;
-      console.log(numOrder);
+
       const newPurchaseOrder: Omit<PurchaseOrderI, "uid"> = {
         type: TypeRequeriment.SERVICES,
         numOrder: numOrder,
@@ -180,7 +179,7 @@ export class PurchaseOrderService {
         true,
       );
 
-      await RequerimentService.manageCount(
+      const responseManage = await RequerimentService.manageCount(
         userClientID,
         subUserClientID,
         "numPurchaseOrdersClient",
@@ -189,26 +188,24 @@ export class PurchaseOrderService {
 
       //ACTUALIZAR NRO DE ORDEN
 
-      const ResourceCountersCollection =
-        mongoose.connection.collection("resourcecounters");
-      const updateLastNumPurchaseOrder = async () => {
+      // 2. Si el contador se procesó bien, actualizamos el número de orden
+      if (responseManage && responseManage.success) {
+        const ResourceCountersCollection =
+          mongoose.connection.collection("resourcecounters");
+
         await ResourceCountersCollection.updateOne(
-          {
-            uid: userProviderID,
-            typeEntity: basicProviderData.data.data?.TypeEntity,
-          },
+          { uid: userProviderID },
           {
             $set: {
               lastNumPurchaseOrder: numOrder,
               updateDate: new Date(),
+              typeEntity: basicProviderData.data.data?.typeEntity,
             },
           },
-          { upsert: true },
+          // SIN upsert: true aquí, para ir sobre seguro
         );
-      };
+      }
 
-      const resp = await updateLastNumPurchaseOrder();
-      console.log(resp);
       // const sendMail = sendEmailPurchaseOrder(newPurchaseOrder);
       let responseEmail = "";
       /*  if ((await sendMail).success) {
