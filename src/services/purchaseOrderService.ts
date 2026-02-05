@@ -15,6 +15,7 @@ import { OrderPurchaseTemplate } from "../utils/OrderPurchaseTemplate";
 import { OrderType, TypeEntity, TypeUser } from "../utils/Types";
 import Fuse from "fuse.js";
 import { PipelineStage, SortOrder } from "mongoose";
+import mongoose from "mongoose";
 
 let API_USER = process.env.API_USER + "/v1/";
 export class PurchaseOrderService {
@@ -185,6 +186,29 @@ export class PurchaseOrderService {
         "numPurchaseOrdersClient",
         true,
       );
+
+      //ACTUALIZAR NRO DE ORDEN
+
+      const ResourceCountersCollection =
+        mongoose.connection.collection("resourcecounters");
+      const updateLastNumPurchaseOrder = async () => {
+        await ResourceCountersCollection.updateOne(
+          {
+            uid: userProviderID,
+            typeEntity: basicProviderData.data.data?.TypeEntity,
+          },
+          {
+            $set: {
+              lastNumPurchaseOrder: numOrder,
+              updateDate: new Date(),
+            },
+          },
+          { upsert: true },
+        );
+      };
+
+      const resp = await updateLastNumPurchaseOrder();
+      console.log(resp);
       // const sendMail = sendEmailPurchaseOrder(newPurchaseOrder);
       let responseEmail = "";
       /*  if ((await sendMail).success) {
