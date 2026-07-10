@@ -839,31 +839,20 @@ export class PurchaseOrderService {
   static getPurchaseOrderPDF = async (uid: string) => {
     try {
       const data = await this.getPurchaseOrderID(uid);
-      if (data && data.success && data.data) {
-        const html = await OrderPurchaseTemplate(data.data[0]);
 
-        // Genera el PDF a partir de la plantilla HTML
-        const pdfBuffer: Buffer = await this.createPDF(html);
-
-        // Convierte el PDF a base64
-        const pdfBase64 = pdfBuffer.toString("base64");
-
-        return {
-          success: true,
-          code: 200,
-          data: pdfBase64,
-        };
-      } else {
-        return {
-          success: false,
-          code: 403,
-          error: {
-            msg: "No se ha encontrado la Orden de Compra",
-          },
-        };
+      if (!data?.success || !data.data) {
+        throw new Error("Orden no encontrada");
       }
+
+      const html = await OrderPurchaseTemplate(data.data[0]);
+      const pdfBuffer = await this.createPDF(html);
+
+      return {
+        success: true,
+        code: 200,
+        data: pdfBuffer, // 🔥 devolvemos Buffer directo
+      };
     } catch (error) {
-      console.log(error);
       return {
         success: false,
         code: 500,
