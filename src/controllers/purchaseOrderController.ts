@@ -175,7 +175,7 @@ const getPurchaseOrdersByClient = async (req: Request, res: Response) => {
 
 const getPurchaseOrderPDFController = async (req: Request, res: Response) => {
   const { uid } = req.params;
-  console.log("entre");
+  
   try {
     const response = await pdfQueue(() =>
       PurchaseOrderService.getPurchaseOrderPDF(uid),
