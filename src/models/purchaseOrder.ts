@@ -169,6 +169,8 @@ const PurchaseOrderSchema = new Schema<PurchaseOrderI>({
   },
 });
 
+PurchaseOrderSchema.index({ userProviderID: 1, numOrder: 1 }, { unique: true });
+
 const PurchaseOrderModel = mongoose.model<PurchaseOrderI>(
   "PurchaseOrderServices",
   PurchaseOrderSchema,
